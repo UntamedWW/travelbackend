@@ -34,6 +34,10 @@ public class UserService {
     public User login(User user){
         User existingUser = userRepository.findByEmail(user.getEmail());
 
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
         if(existingUser == null) throw new IllegalArgumentException("Invalid email or password");
 
         if(!user.getPassword().equals(existingUser.getPassword())){
