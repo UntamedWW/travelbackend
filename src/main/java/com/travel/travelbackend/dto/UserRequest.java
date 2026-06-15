@@ -1,6 +1,11 @@
 package com.travel.travelbackend.dto;
 
-public class UserAuth {
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class UserRequest {
     private String email;
     private String password;
 }
