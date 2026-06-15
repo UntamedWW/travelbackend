@@ -55,6 +55,15 @@ public class PackingItemService {
                 .toList();
     }
 
+    public PackingItemResponse updatePacked(Long id, boolean packed) {
+        PackingItem item = packingItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found"));
+
+        item.setPacked(packed);
+
+        return toResponse(packingItemRepository.save(item));
+    }
+
     public void delete(Long id){
         PackingItem item = packingItemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
