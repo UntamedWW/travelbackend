@@ -3,6 +3,8 @@ package com.travel.travelbackend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "documents")
 @Getter
@@ -17,7 +19,11 @@ public class Document {
 
     private String name;
 
-    private String url;
+    private String number;
+
+    private String url = "";
+
+    private LocalDate expirationDate;
 
     @ManyToOne
     @JoinColumn(name = "trip_id")

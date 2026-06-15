@@ -11,3 +11,7 @@
 ~~6) Update Trip~~
 
 ~~7) Delete Trip~~
+
+8) Document repository
+9) Document service - ability to add pictures.
+10) 
