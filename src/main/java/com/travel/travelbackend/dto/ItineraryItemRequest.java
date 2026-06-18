@@ -5,21 +5,22 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class DocumentRequest {
+public class ItineraryItemRequest {
     @NotBlank
     private String name;
 
-    private String number;
+    private String description;
 
-    private String type;
+    private String location;
 
-    private String url;
+    @NotNull
+    private LocalDateTime startDateTime;
 
-    private LocalDate expirationDate;
+    private LocalDateTime endDateTime;
 
     @NotNull
     private Long tripId;

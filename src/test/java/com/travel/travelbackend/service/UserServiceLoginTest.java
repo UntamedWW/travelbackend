@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -16,6 +17,9 @@ class UserServiceLoginTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -28,10 +32,13 @@ class UserServiceLoginTest {
 
         User existingUser = new User();
         existingUser.setEmail("test@test.com");
-        existingUser.setPassword("123456");
+        existingUser.setPassword("encoded-password");
 
         when(userRepository.findByEmail("test@test.com"))
                 .thenReturn(existingUser);
+
+        when(passwordEncoder.matches("123456", "encoded-password"))
+                .thenReturn(true);
 
         User result = userService.login(loginUser);
 
@@ -69,10 +76,13 @@ class UserServiceLoginTest {
 
         User existingUser = new User();
         existingUser.setEmail("test@test.com");
-        existingUser.setPassword("123456");
+        existingUser.setPassword("encoded-password");
 
         when(userRepository.findByEmail("test@test.com"))
                 .thenReturn(existingUser);
+
+        when(passwordEncoder.matches("wrong", "encoded-password"))
+                .thenReturn(false);
 
         IllegalArgumentException exception =
                 assertThrows(
@@ -95,10 +105,13 @@ class UserServiceLoginTest {
 
         User existingUser = new User();
         existingUser.setEmail("test@test.com");
-        existingUser.setPassword("123456");
+        existingUser.setPassword("encoded-password");
 
         when(userRepository.findByEmail(anyString()))
                 .thenReturn(existingUser);
+
+        when(passwordEncoder.matches("123456", "encoded-password"))
+                .thenReturn(true);
 
         userService.login(loginUser);
 

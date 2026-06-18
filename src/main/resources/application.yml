@@ -1,15 +1,22 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/travel_db
-    username: postgres
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/travel_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
 
-    show-sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
 
     properties:
       hibernate:
-        format_sql: true
+        format_sql: ${SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL:true}
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:change-this-development-secret-change-before-prod}
+    expiration-seconds: ${APP_JWT_EXPIRATION_SECONDS:86400}
+  documents:
+    storage-location: ${APP_DOCUMENTS_STORAGE_LOCATION:uploads/documents}

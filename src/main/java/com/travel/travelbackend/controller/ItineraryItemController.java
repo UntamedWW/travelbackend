@@ -1,8 +1,8 @@
 package com.travel.travelbackend.controller;
 
-import com.travel.travelbackend.dto.TripRequest;
-import com.travel.travelbackend.dto.TripResponse;
-import com.travel.travelbackend.service.TripService;
+import com.travel.travelbackend.dto.ItineraryItemRequest;
+import com.travel.travelbackend.dto.ItineraryItemResponse;
+import com.travel.travelbackend.service.ItineraryItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,35 +20,30 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/trips")
-public class TripController {
+@RequestMapping("api/itinerary-items")
+public class ItineraryItemController {
 
-    private final TripService tripService;
+    private final ItineraryItemService itineraryItemService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TripResponse createTrip(@Valid @RequestBody TripRequest request) {
-        return tripService.createTrip(request);
-    }
-
-    @GetMapping
-    public List<TripResponse> getAllTrips() {
-        return tripService.getAllTrips();
-    }
-
-    @GetMapping("/{id}")
-    public TripResponse getTripById(@PathVariable Long id) {
-        return tripService.getTripById(id);
+    public ItineraryItemResponse create(@Valid @RequestBody ItineraryItemRequest request) {
+        return itineraryItemService.create(request);
     }
 
     @PutMapping("/{id}")
-    public TripResponse updateTrip(@PathVariable Long id, @Valid @RequestBody TripRequest request) {
-        return tripService.updateTrip(id, request);
+    public ItineraryItemResponse edit(@PathVariable Long id, @Valid @RequestBody ItineraryItemRequest request) {
+        return itineraryItemService.edit(id, request);
+    }
+
+    @GetMapping("/trip/{tripId}")
+    public List<ItineraryItemResponse> getByTrip(@PathVariable Long tripId) {
+        return itineraryItemService.getByTrip(tripId);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTrip(@PathVariable Long id) {
-        tripService.deleteTrip(id);
+    public void delete(@PathVariable Long id) {
+        itineraryItemService.delete(id);
     }
 }

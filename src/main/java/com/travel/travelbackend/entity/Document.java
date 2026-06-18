@@ -21,7 +21,17 @@ public class Document {
 
     private String number;
 
+    private String type;
+
     private String url = "";
+
+    private String fileName;
+
+    private String contentType;
+
+    private Long fileSize;
+
+    private String storageKey;
 
     private LocalDate expirationDate;
 

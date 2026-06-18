@@ -1,8 +1,8 @@
 package com.travel.travelbackend.controller;
 
-import com.travel.travelbackend.dto.TripRequest;
-import com.travel.travelbackend.dto.TripResponse;
-import com.travel.travelbackend.service.TripService;
+import com.travel.travelbackend.dto.BudgetRequest;
+import com.travel.travelbackend.dto.BudgetResponse;
+import com.travel.travelbackend.service.BudgetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,35 +20,30 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/trips")
-public class TripController {
+@RequestMapping("api/budgets")
+public class BudgetController {
 
-    private final TripService tripService;
+    private final BudgetService budgetService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TripResponse createTrip(@Valid @RequestBody TripRequest request) {
-        return tripService.createTrip(request);
-    }
-
-    @GetMapping
-    public List<TripResponse> getAllTrips() {
-        return tripService.getAllTrips();
-    }
-
-    @GetMapping("/{id}")
-    public TripResponse getTripById(@PathVariable Long id) {
-        return tripService.getTripById(id);
+    public BudgetResponse create(@Valid @RequestBody BudgetRequest request) {
+        return budgetService.create(request);
     }
 
     @PutMapping("/{id}")
-    public TripResponse updateTrip(@PathVariable Long id, @Valid @RequestBody TripRequest request) {
-        return tripService.updateTrip(id, request);
+    public BudgetResponse edit(@PathVariable Long id, @Valid @RequestBody BudgetRequest request) {
+        return budgetService.edit(id, request);
+    }
+
+    @GetMapping("/trip/{tripId}")
+    public List<BudgetResponse> getByTrip(@PathVariable Long tripId) {
+        return budgetService.getByTrip(tripId);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTrip(@PathVariable Long id) {
-        tripService.deleteTrip(id);
+    public void delete(@PathVariable Long id) {
+        budgetService.delete(id);
     }
 }
