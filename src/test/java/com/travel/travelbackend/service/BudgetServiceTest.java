@@ -8,7 +8,7 @@ import com.travel.travelbackend.entity.Trip;
 import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.repository.BudgetRepository;
 import com.travel.travelbackend.repository.TripRepository;
-import com.travel.travelbackend.repository.UserRepository;
+import com.travel.travelbackend.security.AuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +36,7 @@ class BudgetServiceTest {
     private TripRepository tripRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private AuthenticatedUserProvider authenticatedUserProvider;
 
     @InjectMocks
     private BudgetService budgetService;
@@ -47,10 +47,8 @@ class BudgetServiceTest {
         Trip trip = createTrip();
         User user = createUser();
 
-        when(userRepository.findById(2L))
-                .thenReturn(Optional.of(user));
-
-        when(tripRepository.findById(1L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(user);
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(trip));
 
         when(budgetRepository.save(any(Budget.class)))
@@ -69,8 +67,8 @@ class BudgetServiceTest {
         assertEquals(new BigDecimal("5000.00"), result.getAmount());
         assertEquals(1L, result.getTripId());
 
-        verify(userRepository).findById(2L);
-        verify(tripRepository).findById(1L);
+        verify(authenticatedUserProvider).getCurrentUser();
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(budgetRepository).save(any(Budget.class));
     }
 
@@ -80,10 +78,8 @@ class BudgetServiceTest {
         request.setCategory("car");
         request.setAmount(new BigDecimal("50.00"));
 
-        when(userRepository.findById(2L))
-                .thenReturn(Optional.of(createUser()));
-
-        when(tripRepository.findById(1L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(createTrip()));
 
         when(budgetRepository.save(any(Budget.class)))
@@ -108,13 +104,10 @@ class BudgetServiceTest {
         request.setCategory("hotel");
         request.setAmount(new BigDecimal("250.00"));
 
-        when(budgetRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(budgetRepository.findByIdAndUserId(10L, 2L))
                 .thenReturn(Optional.of(budget));
-
-        when(userRepository.findById(2L))
-                .thenReturn(Optional.of(createUser()));
-
-        when(tripRepository.findById(1L))
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(createTrip()));
 
         when(budgetRepository.save(budget))
@@ -127,9 +120,8 @@ class BudgetServiceTest {
         assertEquals("hotel", result.getCategory());
         assertEquals(new BigDecimal("250.00"), result.getAmount());
 
-        verify(budgetRepository).findById(10L);
-        verify(userRepository).findById(2L);
-        verify(tripRepository).findById(1L);
+        verify(budgetRepository).findByIdAndUserId(10L, 2L);
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(budgetRepository).save(budget);
     }
 
@@ -137,16 +129,20 @@ class BudgetServiceTest {
     void shouldGetBudgetsByTripAndUserSuccessfully() {
         Budget budget = createBudget();
 
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(1L, 2L))
+                .thenReturn(Optional.of(createTrip()));
         when(budgetRepository.findByTripIdAndUserId(1L, 2L))
                 .thenReturn(List.of(budget));
 
-        List<BudgetResponse> result = budgetService.getByTripAndUser(1L, 2L);
+        List<BudgetResponse> result = budgetService.getByTrip(1L);
 
         assertEquals(1, result.size());
         assertEquals(10L, result.getFirst().getId());
         assertEquals(2L, result.getFirst().getUserId());
         assertEquals(1L, result.getFirst().getTripId());
 
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(budgetRepository).findByTripIdAndUserId(1L, 2L);
     }
 
@@ -154,12 +150,13 @@ class BudgetServiceTest {
     void shouldDeleteBudgetSuccessfully() {
         Budget budget = createBudget();
 
-        when(budgetRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(budgetRepository.findByIdAndUserId(10L, 2L))
                 .thenReturn(Optional.of(budget));
 
         budgetService.delete(10L);
 
-        verify(budgetRepository).findById(10L);
+        verify(budgetRepository).findByIdAndUserId(10L, 2L);
         verify(budgetRepository).delete(budget);
     }
 
@@ -191,7 +188,6 @@ class BudgetServiceTest {
 
     private BudgetRequest createRequest(BudgetType type) {
         BudgetRequest request = new BudgetRequest();
-        request.setUserId(2L);
         request.setType(type);
         request.setCategory(null);
         request.setAmount(new BigDecimal("5000.00"));

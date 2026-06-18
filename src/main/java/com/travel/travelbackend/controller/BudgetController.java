@@ -3,6 +3,7 @@ package com.travel.travelbackend.controller;
 import com.travel.travelbackend.dto.BudgetRequest;
 import com.travel.travelbackend.dto.BudgetResponse;
 import com.travel.travelbackend.service.BudgetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,18 +27,18 @@ public class BudgetController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BudgetResponse create(@RequestBody BudgetRequest request) {
+    public BudgetResponse create(@Valid @RequestBody BudgetRequest request) {
         return budgetService.create(request);
     }
 
     @PutMapping("/{id}")
-    public BudgetResponse edit(@PathVariable Long id, @RequestBody BudgetRequest request) {
+    public BudgetResponse edit(@PathVariable Long id, @Valid @RequestBody BudgetRequest request) {
         return budgetService.edit(id, request);
     }
 
-    @GetMapping("/trip/{tripId}/user/{userId}")
-    public List<BudgetResponse> getByTripAndUser(@PathVariable Long tripId, @PathVariable Long userId) {
-        return budgetService.getByTripAndUser(tripId, userId);
+    @GetMapping("/trip/{tripId}")
+    public List<BudgetResponse> getByTrip(@PathVariable Long tripId) {
+        return budgetService.getByTrip(tripId);
     }
 
     @DeleteMapping("/{id}")

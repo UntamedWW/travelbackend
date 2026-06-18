@@ -5,6 +5,7 @@ import com.travel.travelbackend.dto.UserRequest;
 import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.security.JwtService;
 import com.travel.travelbackend.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,13 +20,13 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    public AuthResponse registration(@RequestBody UserRequest request){
+    public AuthResponse registration(@Valid @RequestBody UserRequest request){
         User user = toUser(request);
         return toResponse(userService.register(user));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody UserRequest request) {
+    public AuthResponse login(@Valid @RequestBody UserRequest request) {
         User user = toUser(request);
         return toResponse(userService.login(user));
     }

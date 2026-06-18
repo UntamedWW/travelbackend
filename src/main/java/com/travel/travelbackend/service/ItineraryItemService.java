@@ -4,8 +4,10 @@ import com.travel.travelbackend.dto.ItineraryItemRequest;
 import com.travel.travelbackend.dto.ItineraryItemResponse;
 import com.travel.travelbackend.entity.ItineraryItem;
 import com.travel.travelbackend.entity.Trip;
+import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.repository.ItineraryItemRepository;
 import com.travel.travelbackend.repository.TripRepository;
+import com.travel.travelbackend.security.AuthenticatedUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +19,13 @@ public class ItineraryItemService {
 
     private final ItineraryItemRepository itineraryItemRepository;
     private final TripRepository tripRepository;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     public ItineraryItemResponse create(ItineraryItemRequest request) {
         validateRequest(request);
 
-        Trip trip = findTrip(request.getTripId());
+        User user = authenticatedUserProvider.getCurrentUser();
+        Trip trip = findCurrentUserTrip(request.getTripId(), user.getId());
 
         ItineraryItem itineraryItem = new ItineraryItem();
         applyRequest(itineraryItem, request, trip);
@@ -32,31 +36,36 @@ public class ItineraryItemService {
     public ItineraryItemResponse edit(Long id, ItineraryItemRequest request) {
         validateRequest(request);
 
-        ItineraryItem itineraryItem = itineraryItemRepository.findById(id)
+        User user = authenticatedUserProvider.getCurrentUser();
+        ItineraryItem itineraryItem = itineraryItemRepository.findByIdAndTripUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Itinerary item not found"));
 
-        Trip trip = findTrip(request.getTripId());
+        Trip trip = findCurrentUserTrip(request.getTripId(), user.getId());
         applyRequest(itineraryItem, request, trip);
 
         return toResponse(itineraryItemRepository.save(itineraryItem));
     }
 
     public List<ItineraryItemResponse> getByTrip(Long tripId) {
-        return itineraryItemRepository.findByTripId(tripId)
+        User user = authenticatedUserProvider.getCurrentUser();
+        findCurrentUserTrip(tripId, user.getId());
+
+        return itineraryItemRepository.findByTripIdAndTripUserId(tripId, user.getId())
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     public void delete(Long id) {
-        ItineraryItem itineraryItem = itineraryItemRepository.findById(id)
+        User user = authenticatedUserProvider.getCurrentUser();
+        ItineraryItem itineraryItem = itineraryItemRepository.findByIdAndTripUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Itinerary item not found"));
 
         itineraryItemRepository.delete(itineraryItem);
     }
 
-    private Trip findTrip(Long tripId) {
-        return tripRepository.findById(tripId)
+    private Trip findCurrentUserTrip(Long tripId, Long userId) {
+        return tripRepository.findByIdAndUserId(tripId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Trip not found"));
     }
 

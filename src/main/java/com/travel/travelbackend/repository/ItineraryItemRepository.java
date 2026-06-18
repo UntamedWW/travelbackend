@@ -5,8 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ItineraryItemRepository extends JpaRepository<ItineraryItem, Long> {
-    List<ItineraryItem> findByTripId(Long tripId);
+    List<ItineraryItem> findByTripIdAndTripUserId(Long tripId, Long userId);
+
+    Optional<ItineraryItem> findByIdAndTripUserId(Long id, Long userId);
 }

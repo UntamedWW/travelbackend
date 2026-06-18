@@ -3,6 +3,7 @@ package com.travel.travelbackend.controller;
 import com.travel.travelbackend.dto.ItineraryItemRequest;
 import com.travel.travelbackend.dto.ItineraryItemResponse;
 import com.travel.travelbackend.service.ItineraryItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,12 +27,12 @@ public class ItineraryItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItineraryItemResponse create(@RequestBody ItineraryItemRequest request) {
+    public ItineraryItemResponse create(@Valid @RequestBody ItineraryItemRequest request) {
         return itineraryItemService.create(request);
     }
 
     @PutMapping("/{id}")
-    public ItineraryItemResponse edit(@PathVariable Long id, @RequestBody ItineraryItemRequest request) {
+    public ItineraryItemResponse edit(@PathVariable Long id, @Valid @RequestBody ItineraryItemRequest request) {
         return itineraryItemService.edit(id, request);
     }
 

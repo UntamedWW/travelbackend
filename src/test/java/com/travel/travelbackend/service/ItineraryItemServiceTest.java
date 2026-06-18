@@ -4,8 +4,10 @@ import com.travel.travelbackend.dto.ItineraryItemRequest;
 import com.travel.travelbackend.dto.ItineraryItemResponse;
 import com.travel.travelbackend.entity.ItineraryItem;
 import com.travel.travelbackend.entity.Trip;
+import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.repository.ItineraryItemRepository;
 import com.travel.travelbackend.repository.TripRepository;
+import com.travel.travelbackend.security.AuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +33,9 @@ class ItineraryItemServiceTest {
     @Mock
     private TripRepository tripRepository;
 
+    @Mock
+    private AuthenticatedUserProvider authenticatedUserProvider;
+
     @InjectMocks
     private ItineraryItemService itineraryItemService;
 
@@ -39,7 +44,8 @@ class ItineraryItemServiceTest {
         ItineraryItemRequest request = createRequest();
         Trip trip = createTrip();
 
-        when(tripRepository.findById(1L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(trip));
 
         when(itineraryItemRepository.save(any(ItineraryItem.class)))
@@ -58,7 +64,7 @@ class ItineraryItemServiceTest {
         assertEquals("Rome", result.getLocation());
         assertEquals(1L, result.getTripId());
 
-        verify(tripRepository).findById(1L);
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(itineraryItemRepository).save(any(ItineraryItem.class));
     }
 
@@ -69,10 +75,11 @@ class ItineraryItemServiceTest {
         request.setName("Updated museum visit");
         Trip trip = createTrip();
 
-        when(itineraryItemRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(itineraryItemRepository.findByIdAndTripUserId(10L, 2L))
                 .thenReturn(Optional.of(itineraryItem));
 
-        when(tripRepository.findById(1L))
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(trip));
 
         when(itineraryItemRepository.save(itineraryItem))
@@ -84,8 +91,8 @@ class ItineraryItemServiceTest {
         assertEquals("Updated museum visit", result.getName());
         assertEquals(1L, result.getTripId());
 
-        verify(itineraryItemRepository).findById(10L);
-        verify(tripRepository).findById(1L);
+        verify(itineraryItemRepository).findByIdAndTripUserId(10L, 2L);
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(itineraryItemRepository).save(itineraryItem);
     }
 
@@ -93,7 +100,10 @@ class ItineraryItemServiceTest {
     void shouldGetItineraryItemsByTripSuccessfully() {
         ItineraryItem itineraryItem = createItineraryItem();
 
-        when(itineraryItemRepository.findByTripId(1L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(1L, 2L))
+                .thenReturn(Optional.of(createTrip()));
+        when(itineraryItemRepository.findByTripIdAndTripUserId(1L, 2L))
                 .thenReturn(List.of(itineraryItem));
 
         List<ItineraryItemResponse> result = itineraryItemService.getByTrip(1L);
@@ -103,19 +113,20 @@ class ItineraryItemServiceTest {
         assertEquals("Visit museum", result.getFirst().getName());
         assertEquals(1L, result.getFirst().getTripId());
 
-        verify(itineraryItemRepository).findByTripId(1L);
+        verify(itineraryItemRepository).findByTripIdAndTripUserId(1L, 2L);
     }
 
     @Test
     void shouldDeleteItineraryItemSuccessfully() {
         ItineraryItem itineraryItem = createItineraryItem();
 
-        when(itineraryItemRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(itineraryItemRepository.findByIdAndTripUserId(10L, 2L))
                 .thenReturn(Optional.of(itineraryItem));
 
         itineraryItemService.delete(10L);
 
-        verify(itineraryItemRepository).findById(10L);
+        verify(itineraryItemRepository).findByIdAndTripUserId(10L, 2L);
         verify(itineraryItemRepository).delete(itineraryItem);
     }
 
@@ -145,6 +156,15 @@ class ItineraryItemServiceTest {
     private Trip createTrip() {
         Trip trip = new Trip();
         trip.setId(1L);
+        trip.setUser(createUser());
         return trip;
+    }
+
+    private User createUser() {
+        User user = new User();
+        user.setId(2L);
+        user.setEmail("test@example.com");
+        user.setPassword("password");
+        return user;
     }
 }

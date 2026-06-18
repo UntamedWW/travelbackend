@@ -5,7 +5,7 @@ import com.travel.travelbackend.dto.TripResponse;
 import com.travel.travelbackend.entity.Trip;
 import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.repository.TripRepository;
-import com.travel.travelbackend.repository.UserRepository;
+import com.travel.travelbackend.security.AuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +26,7 @@ class TripServiceTest {
     private TripRepository tripRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private AuthenticatedUserProvider authenticatedUserProvider;
 
     @InjectMocks
     private TripService tripService;
@@ -36,8 +36,7 @@ class TripServiceTest {
         TripRequest request = createRequest();
         User user = createUser();
 
-        when(userRepository.findById(1L))
-                .thenReturn(Optional.of(user));
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(user);
 
         when(tripRepository.save(any(Trip.class)))
                 .thenAnswer(invocation -> {
@@ -54,7 +53,7 @@ class TripServiceTest {
         assertEquals("Italy", result.getDestination());
         assertEquals(1L, result.getUserId());
 
-        verify(userRepository).findById(1L);
+        verify(authenticatedUserProvider).getCurrentUser();
         verify(tripRepository).save(any(Trip.class));
     }
 
@@ -62,7 +61,8 @@ class TripServiceTest {
     void shouldGetAllTripsSuccessfully() {
         Trip trip = createTrip();
 
-        when(tripRepository.findAll())
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByUserId(1L))
                 .thenReturn(List.of(trip));
 
         List<TripResponse> result = tripService.getAllTrips();
@@ -72,14 +72,15 @@ class TripServiceTest {
         assertEquals("Summer Trip", result.getFirst().getTitle());
         assertEquals(1L, result.getFirst().getUserId());
 
-        verify(tripRepository).findAll();
+        verify(tripRepository).findByUserId(1L);
     }
 
     @Test
     void shouldGetTripByIdSuccessfully() {
         Trip trip = createTrip();
 
-        when(tripRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(trip));
 
         TripResponse result = tripService.getTripById(10L);
@@ -88,7 +89,7 @@ class TripServiceTest {
         assertEquals("Summer Trip", result.getTitle());
         assertEquals("Italy", result.getDestination());
 
-        verify(tripRepository).findById(10L);
+        verify(tripRepository).findByIdAndUserId(10L, 1L);
     }
 
     @Test
@@ -99,11 +100,9 @@ class TripServiceTest {
         request.setDestination("Spain");
         User user = createUser();
 
-        when(tripRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(user);
+        when(tripRepository.findByIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(existingTrip));
-
-        when(userRepository.findById(1L))
-                .thenReturn(Optional.of(user));
 
         when(tripRepository.save(existingTrip))
                 .thenReturn(existingTrip);
@@ -115,8 +114,8 @@ class TripServiceTest {
         assertEquals("Spain", result.getDestination());
         assertEquals(1L, result.getUserId());
 
-        verify(tripRepository).findById(10L);
-        verify(userRepository).findById(1L);
+        verify(tripRepository).findByIdAndUserId(10L, 1L);
+        verify(authenticatedUserProvider).getCurrentUser();
         verify(tripRepository).save(existingTrip);
     }
 
@@ -124,12 +123,13 @@ class TripServiceTest {
     void shouldDeleteTripSuccessfully() {
         Trip trip = createTrip();
 
-        when(tripRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(trip));
 
         tripService.deleteTrip(10L);
 
-        verify(tripRepository).findById(10L);
+        verify(tripRepository).findByIdAndUserId(10L, 1L);
         verify(tripRepository).delete(trip);
     }
 
@@ -139,7 +139,6 @@ class TripServiceTest {
         request.setDestination("Italy");
         request.setStartDate(LocalDate.of(2026, 7, 1));
         request.setEndDate(LocalDate.of(2026, 7, 10));
-        request.setUserId(1L);
         return request;
     }
 

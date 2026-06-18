@@ -4,8 +4,10 @@ import com.travel.travelbackend.dto.DocumentRequest;
 import com.travel.travelbackend.dto.DocumentResponse;
 import com.travel.travelbackend.entity.Document;
 import com.travel.travelbackend.entity.Trip;
+import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.repository.DocumentRepository;
 import com.travel.travelbackend.repository.TripRepository;
+import com.travel.travelbackend.security.AuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +30,9 @@ class DocumentServiceTest {
     @Mock
     private TripRepository tripRepository;
 
+    @Mock
+    private AuthenticatedUserProvider authenticatedUserProvider;
+
     @InjectMocks
     private DocumentService documentService;
 
@@ -36,7 +41,8 @@ class DocumentServiceTest {
         DocumentRequest request = createRequest();
         Trip trip = createTrip();
 
-        when(tripRepository.findById(1L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(trip));
 
         when(documentRepository.save(any(Document.class)))
@@ -56,7 +62,7 @@ class DocumentServiceTest {
         assertEquals("hotel.jpg", result.getUrl());
         assertEquals(1L, result.getTripId());
 
-        verify(tripRepository).findById(1L);
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(documentRepository).save(any(Document.class));
     }
 
@@ -69,10 +75,11 @@ class DocumentServiceTest {
         request.setType("insurance");
         Trip trip = createTrip();
 
-        when(documentRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(documentRepository.findByIdAndTripUserId(10L, 2L))
                 .thenReturn(Optional.of(document));
 
-        when(tripRepository.findById(1L))
+        when(tripRepository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.of(trip));
 
         when(documentRepository.save(document))
@@ -86,8 +93,8 @@ class DocumentServiceTest {
         assertEquals("XYZ789", result.getNumber());
         assertEquals(1L, result.getTripId());
 
-        verify(documentRepository).findById(10L);
-        verify(tripRepository).findById(1L);
+        verify(documentRepository).findByIdAndTripUserId(10L, 2L);
+        verify(tripRepository).findByIdAndUserId(1L, 2L);
         verify(documentRepository).save(document);
     }
 
@@ -95,7 +102,10 @@ class DocumentServiceTest {
     void shouldGetDocumentsByTripSuccessfully() {
         Document document = createDocument();
 
-        when(documentRepository.findByTripId(1L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(tripRepository.findByIdAndUserId(1L, 2L))
+                .thenReturn(Optional.of(createTrip()));
+        when(documentRepository.findByTripIdAndTripUserId(1L, 2L))
                 .thenReturn(List.of(document));
 
         List<DocumentResponse> result = documentService.getByTrip(1L);
@@ -106,19 +116,20 @@ class DocumentServiceTest {
         assertEquals("booking", result.getFirst().getType());
         assertEquals(1L, result.getFirst().getTripId());
 
-        verify(documentRepository).findByTripId(1L);
+        verify(documentRepository).findByTripIdAndTripUserId(1L, 2L);
     }
 
     @Test
     void shouldDeleteDocumentSuccessfully() {
         Document document = createDocument();
 
-        when(documentRepository.findById(10L))
+        when(authenticatedUserProvider.getCurrentUser()).thenReturn(createUser());
+        when(documentRepository.findByIdAndTripUserId(10L, 2L))
                 .thenReturn(Optional.of(document));
 
         documentService.delete(10L);
 
-        verify(documentRepository).findById(10L);
+        verify(documentRepository).findByIdAndTripUserId(10L, 2L);
         verify(documentRepository).delete(document);
     }
 
@@ -152,6 +163,15 @@ class DocumentServiceTest {
         trip.setDestination("Italy");
         trip.setStartDate(LocalDate.of(2026, 7, 1));
         trip.setEndDate(LocalDate.of(2026, 7, 10));
+        trip.setUser(createUser());
         return trip;
+    }
+
+    private User createUser() {
+        User user = new User();
+        user.setId(2L);
+        user.setEmail("test@example.com");
+        user.setPassword("password");
+        return user;
     }
 }

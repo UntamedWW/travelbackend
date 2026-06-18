@@ -8,7 +8,7 @@ import com.travel.travelbackend.entity.Trip;
 import com.travel.travelbackend.entity.User;
 import com.travel.travelbackend.repository.BudgetRepository;
 import com.travel.travelbackend.repository.TripRepository;
-import com.travel.travelbackend.repository.UserRepository;
+import com.travel.travelbackend.security.AuthenticatedUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +21,13 @@ public class BudgetService {
 
     private final BudgetRepository budgetRepository;
     private final TripRepository tripRepository;
-    private final UserRepository userRepository;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     public BudgetResponse create(BudgetRequest request) {
         validateRequest(request);
 
-        User user = findUser(request.getUserId());
-        Trip trip = findTrip(request.getTripId());
+        User user = authenticatedUserProvider.getCurrentUser();
+        Trip trip = findCurrentUserTrip(request.getTripId(), user.getId());
         Budget budget = new Budget();
         applyRequest(budget, request, trip, user);
 
@@ -37,45 +37,40 @@ public class BudgetService {
     public BudgetResponse edit(Long id, BudgetRequest request) {
         validateRequest(request);
 
-        Budget budget = budgetRepository.findById(id)
+        User user = authenticatedUserProvider.getCurrentUser();
+        Budget budget = budgetRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Budget item not found"));
 
-        User user = findUser(request.getUserId());
-        Trip trip = findTrip(request.getTripId());
+        Trip trip = findCurrentUserTrip(request.getTripId(), user.getId());
         applyRequest(budget, request, trip, user);
 
         return toResponse(budgetRepository.save(budget));
     }
 
-    public List<BudgetResponse> getByTripAndUser(Long tripId, Long userId) {
+    public List<BudgetResponse> getByTrip(Long tripId) {
         if (tripId == null) {
             throw new IllegalArgumentException("Trip id is required");
         }
 
-        if (userId == null) {
-            throw new IllegalArgumentException("User id is required");
-        }
+        User user = authenticatedUserProvider.getCurrentUser();
+        findCurrentUserTrip(tripId, user.getId());
 
-        return budgetRepository.findByTripIdAndUserId(tripId, userId)
+        return budgetRepository.findByTripIdAndUserId(tripId, user.getId())
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     public void delete(Long id) {
-        Budget budget = budgetRepository.findById(id)
+        User user = authenticatedUserProvider.getCurrentUser();
+        Budget budget = budgetRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Budget item not found"));
 
         budgetRepository.delete(budget);
     }
 
-    private User findUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    }
-
-    private Trip findTrip(Long tripId) {
-        return tripRepository.findById(tripId)
+    private Trip findCurrentUserTrip(Long tripId, Long userId) {
+        return tripRepository.findByIdAndUserId(tripId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Trip not found"));
     }
 
@@ -113,9 +108,6 @@ public class BudgetService {
             throw new IllegalArgumentException("Trip id is required");
         }
 
-        if (request.getUserId() == null) {
-            throw new IllegalArgumentException("User id is required");
-        }
     }
 
     private BudgetResponse toResponse(Budget budget) {

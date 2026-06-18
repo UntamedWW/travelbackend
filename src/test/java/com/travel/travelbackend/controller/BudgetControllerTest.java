@@ -82,17 +82,17 @@ class BudgetControllerTest {
     }
 
     @Test
-    void shouldGetBudgetsByTripAndUserSuccessfully() throws Exception {
-        when(budgetService.getByTripAndUser(1L, 2L))
+    void shouldGetBudgetsByTripSuccessfully() throws Exception {
+        when(budgetService.getByTrip(1L))
                 .thenReturn(List.of(createResponse()));
 
-        mockMvc.perform(get("/api/budgets/trip/1/user/2"))
+        mockMvc.perform(get("/api/budgets/trip/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(10))
                 .andExpect(jsonPath("$[0].userId").value(2))
                 .andExpect(jsonPath("$[0].tripId").value(1));
 
-        verify(budgetService).getByTripAndUser(1L, 2L);
+        verify(budgetService).getByTrip(1L);
     }
 
     @Test
@@ -105,7 +105,6 @@ class BudgetControllerTest {
 
     private BudgetRequest createRequest() {
         BudgetRequest request = new BudgetRequest();
-        request.setUserId(2L);
         request.setType(BudgetType.BUDGET);
         request.setAmount(new BigDecimal("5000.00"));
         request.setTripId(1L);

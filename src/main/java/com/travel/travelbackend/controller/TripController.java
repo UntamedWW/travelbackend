@@ -3,6 +3,7 @@ package com.travel.travelbackend.controller;
 import com.travel.travelbackend.dto.TripRequest;
 import com.travel.travelbackend.dto.TripResponse;
 import com.travel.travelbackend.service.TripService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +27,7 @@ public class TripController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TripResponse createTrip(@RequestBody TripRequest request) {
+    public TripResponse createTrip(@Valid @RequestBody TripRequest request) {
         return tripService.createTrip(request);
     }
 
@@ -41,7 +42,7 @@ public class TripController {
     }
 
     @PutMapping("/{id}")
-    public TripResponse updateTrip(@PathVariable Long id, @RequestBody TripRequest request) {
+    public TripResponse updateTrip(@PathVariable Long id, @Valid @RequestBody TripRequest request) {
         return tripService.updateTrip(id, request);
     }
 
