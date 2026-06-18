@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:18
+    container_name: travelbackend-db
+    environment:
+      POSTGRES_DB: travel_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d travel_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: travelbackend-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/travel_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      APP_JWT_SECRET: change-this-development-secret-change-before-prod
+      APP_DOCUMENTS_STORAGE_LOCATION: /app/uploads/documents
+    ports:
+      - "8080:8080"
+    volumes:
+      - document-uploads:/app/uploads/documents
+
+volumes:
+  postgres-data:
+  document-uploads:
