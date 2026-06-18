@@ -85,6 +85,7 @@ public class DocumentService {
                 document.getId(),
                 document.getName(),
                 document.getNumber(),
+                document.getType(),
                 document.getUrl(),
                 document.getExpirationDate(),
                 tripId

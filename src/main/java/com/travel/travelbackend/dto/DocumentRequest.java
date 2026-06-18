@@ -10,6 +10,7 @@ import java.time.LocalDate;
 public class DocumentRequest {
     private String name;
     private String number;
+    private String type;
     private String url;
     private LocalDate expirationDate;
     private Long tripId;

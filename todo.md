@@ -33,9 +33,9 @@
 
 18) **HERE**: Add Itinerary CRUD for trips:
 ~~- create ItineraryItem request/response DTOs +~~
-- create ItineraryItemRepository with findByTripId 
-- create ItineraryItemService with add, get by trip, edit, delete
-- create ItineraryItemController endpoints
-- validate required fields: title, startDateTime, tripId
-- ensure itinerary items belong to the authenticated user's trip
-- add tests for create, list by trip, update, and delete
+~~- create ItineraryItemRepository with findByTripId~~ 
+~~- create ItineraryItemService with add, get by trip, edit, delete~~
+~~- create ItineraryItemController endpoints~~
+~~- validate required fields: title, startDateTime, tripId~~
+~~- ensure itinerary items belong to the authenticated user's trip~~
+~~- add tests for create, list by trip, update, and delete~~

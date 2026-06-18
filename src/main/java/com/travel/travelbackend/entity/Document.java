@@ -21,6 +21,8 @@ public class Document {
 
     private String number;
 
+    private String type;
+
     private String url = "";
 
     private LocalDate expirationDate;

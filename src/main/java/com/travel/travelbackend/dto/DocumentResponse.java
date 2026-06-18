@@ -10,6 +10,7 @@ import java.time.LocalDate;
 public class DocumentResponse {
     private Long id;
     private String name;
+    private String type;
     private String number;
     private String url;
     private LocalDate expirationDate;
