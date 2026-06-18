@@ -51,6 +51,7 @@ class DocumentServiceTest {
         assertNotNull(result);
         assertEquals(10L, result.getId());
         assertEquals("Hotel booking", result.getName());
+        assertEquals("booking", result.getType());
         assertEquals("ABC123", result.getNumber());
         assertEquals("hotel.jpg", result.getUrl());
         assertEquals(1L, result.getTripId());
@@ -65,6 +66,7 @@ class DocumentServiceTest {
         DocumentRequest request = createRequest();
         request.setName("Updated booking");
         request.setNumber("XYZ789");
+        request.setType("insurance");
         Trip trip = createTrip();
 
         when(documentRepository.findById(10L))
@@ -80,6 +82,7 @@ class DocumentServiceTest {
 
         assertEquals(10L, result.getId());
         assertEquals("Updated booking", result.getName());
+        assertEquals("insurance", result.getType());
         assertEquals("XYZ789", result.getNumber());
         assertEquals(1L, result.getTripId());
 
@@ -100,6 +103,7 @@ class DocumentServiceTest {
         assertEquals(1, result.size());
         assertEquals(10L, result.getFirst().getId());
         assertEquals("Hotel booking", result.getFirst().getName());
+        assertEquals("booking", result.getFirst().getType());
         assertEquals(1L, result.getFirst().getTripId());
 
         verify(documentRepository).findByTripId(1L);
@@ -122,6 +126,7 @@ class DocumentServiceTest {
         DocumentRequest request = new DocumentRequest();
         request.setName("Hotel booking");
         request.setNumber("ABC123");
+        request.setType("booking");
         request.setUrl("hotel.jpg");
         request.setExpirationDate(LocalDate.of(2026, 8, 15));
         request.setTripId(1L);
@@ -133,6 +138,7 @@ class DocumentServiceTest {
         document.setId(10L);
         document.setName("Hotel booking");
         document.setNumber("ABC123");
+        document.setType("booking");
         document.setUrl("hotel.jpg");
         document.setExpirationDate(LocalDate.of(2026, 8, 15));
         document.setTrip(createTrip());

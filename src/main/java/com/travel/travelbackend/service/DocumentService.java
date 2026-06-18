@@ -63,6 +63,7 @@ public class DocumentService {
     private void applyRequest(Document document, DocumentRequest request, Trip trip) {
         document.setName(request.getName());
         document.setNumber(request.getNumber());
+        document.setType(request.getType());
         document.setUrl(request.getUrl() == null ? "" : request.getUrl());
         document.setExpirationDate(request.getExpirationDate());
         document.setTrip(trip);
@@ -84,8 +85,8 @@ public class DocumentService {
         return new DocumentResponse(
                 document.getId(),
                 document.getName(),
-                document.getNumber(),
                 document.getType(),
+                document.getNumber(),
                 document.getUrl(),
                 document.getExpirationDate(),
                 tripId
